@@ -6,20 +6,27 @@ on:
   push:
     branches:
       - main
-    tags:
-      - v*
+      - test-delete
+    paths:
+      - "VERSION"
 
 jobs:
   tag-github:
-    uses: omec-project/.github/.github/workflows/tag-github.yml@main
+    uses: gab-arrobo/.github/.github/workflows/tag-github.yml@fix-issue-branch-creation
     secrets: inherit
 
   update-version:
     needs: tag-github
-    uses: omec-project/.github/.github/workflows/update-version.yml@main
+    uses: gab-arrobo/.github/.github/workflows/update-version.yml@fix-issue-branch-creation
+    with:
+      changed: ${{ needs.tag-github.outputs.changed }}
+      version: ${{ needs.tag-github.outputs.version }}
     secrets: inherit
 
   branch-release:
     needs: tag-github
-    uses: omec-project/.github/.github/workflows/branch-release.yml@main
+    uses: gab-arrobo/.github/.github/workflows/branch-release.yml@fix-issue-branch-creation
+    with:
+      release_branch: ${{ needs.tag-github.outputs.release_branch }}
+      version_branch: ${{ needs.tag-github.outputs.version_branch }}
     secrets: inherit
